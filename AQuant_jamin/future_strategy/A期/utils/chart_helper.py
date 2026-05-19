@@ -379,3 +379,178 @@ def create_kline_with_elliott(
             )
 
     return fig
+
+# ============================================================
+# 增强版多面板 K 线图（K线 + MA + 成交量 + MACD/KDJ/RSI 子图）
+# ============================================================
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import pandas as pd
+from config import COLORS
+
+
+def plot_full_chart(
+    df: pd.DataFrame,
+    title: str = "",
+    show_ma: bool = True,
+    show_volume: bool = True,
+    show_macd: bool = False,
+    show_kdj: bool = False,
+    show_rsi: bool = False,
+    ma_periods: tuple = (5, 20, 60),
+) -> go.Figure:
+    """
+    构造一张多面板 K 线图。
+
+    Args:
+        df: 已经跑过 calc_all_indicators 的 DataFrame，索引为日期
+        title: 图表标题
+        show_ma/volume/macd/kdj/rsi: 各指标开关
+        ma_periods: 要叠加在 K 线主图上的均线周期
+    """
+    if df is None or df.empty:
+        return go.Figure().update_layout(title=f"{title} - 无数据")
+
+    # ===== 1. 按开关计算子图数量与高度 =====
+    panels = [("K线", 0.50)]                       # 主图始终存在
+    if show_volume: panels.append(("成交量", 0.15))
+    if show_macd:   panels.append(("MACD",   0.13))
+    if show_kdj:    panels.append(("KDJ",    0.12))
+    if show_rsi:    panels.append(("RSI",    0.10))
+
+    # 高度按比例归一化
+    total_h = sum(h for _, h in panels)
+    row_heights = [h / total_h for _, h in panels]
+    panel_titles = [name for name, _ in panels]
+
+    fig = make_subplots(
+        rows=len(panels),
+        cols=1,
+        shared_xaxes=True,
+        vertical_spacing=0.03,
+        row_heights=row_heights,
+        subplot_titles=panel_titles,
+    )
+
+    # ===== 2. 主图：K 线 =====
+    fig.add_trace(
+        go.Candlestick(
+            x=df.index,
+            open=df["open"], high=df["high"], low=df["low"], close=df["close"],
+            increasing=dict(line=dict(color=COLORS["rise"]), fillcolor=COLORS["rise"]),
+            decreasing=dict(line=dict(color=COLORS["fall"]), fillcolor=COLORS["fall"]),
+            name="K线",
+            showlegend=False,
+        ),
+        row=1, col=1,
+    )
+
+    # 均线叠加在主图
+    if show_ma:
+        ma_colors = ["#f59e0b", "#8b5cf6", "#3b82f6", "#10b981", "#ef4444"]
+        for i, p in enumerate(ma_periods):
+            col = f"MA{p}"
+            if col in df.columns:
+                fig.add_trace(
+                    go.Scatter(
+                        x=df.index, y=df[col],
+                        name=f"MA{p}",
+                        mode="lines",
+                        line=dict(color=ma_colors[i % len(ma_colors)], width=1.2),
+                    ),
+                    row=1, col=1,
+                )
+
+    # ===== 3. 成交量子图（红涨绿跌着色）=====
+    cur_row = 2
+    if show_volume:
+        vol_colors = [
+            COLORS["rise"] if c >= o else COLORS["fall"]
+            for c, o in zip(df["close"], df["open"])
+        ]
+        fig.add_trace(
+            go.Bar(
+                x=df.index, y=df["volume"],
+                marker_color=vol_colors,
+                name="成交量",
+                showlegend=False,
+            ),
+            row=cur_row, col=1,
+        )
+        cur_row += 1
+
+    # ===== 4. MACD 子图（DIF 线 + DEA 线 + HIST 柱）=====
+    if show_macd and "MACD_DIF" in df.columns:
+        fig.add_trace(
+            go.Scatter(x=df.index, y=df["MACD_DIF"], name="DIF",
+                       line=dict(color="#3b82f6", width=1.2)),
+            row=cur_row, col=1,
+        )
+        fig.add_trace(
+            go.Scatter(x=df.index, y=df["MACD_SIGNAL"], name="DEA",
+                       line=dict(color="#f59e0b", width=1.2)),
+            row=cur_row, col=1,
+        )
+        hist_colors = [
+            COLORS["rise"] if v >= 0 else COLORS["fall"]
+            for v in df["MACD_HIST"].fillna(0)
+        ]
+        fig.add_trace(
+            go.Bar(x=df.index, y=df["MACD_HIST"], name="HIST",
+                   marker_color=hist_colors, showlegend=False),
+            row=cur_row, col=1,
+        )
+        cur_row += 1
+
+    # ===== 5. KDJ 子图 =====
+    if show_kdj and "K" in df.columns:
+        fig.add_trace(
+            go.Scatter(x=df.index, y=df["K"], name="K",
+                       line=dict(color="#3b82f6", width=1.2)),
+            row=cur_row, col=1,
+        )
+        fig.add_trace(
+            go.Scatter(x=df.index, y=df["D"], name="D",
+                       line=dict(color="#f59e0b", width=1.2)),
+            row=cur_row, col=1,
+        )
+        fig.add_trace(
+            go.Scatter(x=df.index, y=df["J"], name="J",
+                       line=dict(color="#a855f7", width=1.0)),
+            row=cur_row, col=1,
+        )
+        # 80 / 20 超买超卖参考线
+        fig.add_hline(y=80, line=dict(color="#ef4444", width=0.6, dash="dot"),
+                      row=cur_row, col=1)
+        fig.add_hline(y=20, line=dict(color="#10b981", width=0.6, dash="dot"),
+                      row=cur_row, col=1)
+        cur_row += 1
+
+    # ===== 6. RSI 子图 =====
+    if show_rsi and "RSI" in df.columns:
+        fig.add_trace(
+            go.Scatter(x=df.index, y=df["RSI"], name="RSI(14)",
+                       line=dict(color="#8b5cf6", width=1.2)),
+            row=cur_row, col=1,
+        )
+        fig.add_hline(y=70, line=dict(color="#ef4444", width=0.6, dash="dot"),
+                      row=cur_row, col=1)
+        fig.add_hline(y=30, line=dict(color="#10b981", width=0.6, dash="dot"),
+                      row=cur_row, col=1)
+        fig.add_hline(y=50, line=dict(color="#94a3b8", width=0.4, dash="dot"),
+                      row=cur_row, col=1)
+        cur_row += 1
+
+    # ===== 7. 全局样式 =====
+    fig.update_layout(
+        title=title,
+        template="plotly_white",
+        height=240 * len(panels) + 80,
+        hovermode="x unified",
+        xaxis_rangeslider_visible=False,   # 隐藏 Plotly 自带的小型缩略条
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=60, b=40),
+    )
+    fig.update_xaxes(showgrid=True, gridcolor="#e2e8f0")
+    fig.update_yaxes(showgrid=True, gridcolor="#e2e8f0")
+    return fig

@@ -16,6 +16,8 @@ from services.elliott_wave import analyze_elliott, get_elliott_conclusion
 from services.fund_flow import calc_fund_flow_all, get_fund_flow_conclusions
 from services.news_scraper import get_news, get_news_sentiment_score
 from services.blogger_scraper import get_all_blogger_views, calculate_blogger_score
+from services.sentiment import get_batch_sentiment_score
+
 
 
 def render_prediction():
@@ -86,7 +88,7 @@ def render_prediction():
         fund_direction = overall_fund.get("direction", "中性")
         fund_reason = overall_fund.get("reason", "")
 
-    # 消息面
+    # 消息面（商品期货专用情感分析：传入 selected 中文名 → 自动叠加行业差异化词库）
     progress.progress(65, text="正在获取新闻数据...")
     news_score = 50
     news_direction = "中性"
@@ -95,12 +97,25 @@ def render_prediction():
     try:
         news_df = get_news()
         if not news_df.empty:
-            news_result = get_news_sentiment_score(news_df)
-            news_score = news_result.get("score", 50)
-            news_direction = news_result.get("direction", "中性")
-            news_confidence = news_result.get("confidence", "低")
-    except Exception:
+            # 优先用 title 列；若没有，则回退到 content/正文列
+            if "title" in news_df.columns:
+                news_titles = news_df["title"].dropna().astype(str).tolist()
+            elif "content" in news_df.columns:
+                news_titles = news_df["content"].dropna().astype(str).tolist()
+            else:
+                # 兜底：把第一列当文本
+                news_titles = news_df.iloc[:, 0].dropna().astype(str).tolist()
+
+            if news_titles:
+                news_result = get_batch_sentiment_score(news_titles, symbol_name=selected)
+                news_score = news_result.get("score", 50)
+                news_direction = news_result.get("direction", "中性")
+                news_confidence = news_result.get("confidence", "低")
+    except Exception as e:
+        # 调试期间可以打印异常；生产环境保持静默
+        # st.warning(f"消息面分析异常：{e}")
         pass
+
 
     # 博主观点
     progress.progress(85, text="正在获取博主观点...")

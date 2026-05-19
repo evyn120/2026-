@@ -4,6 +4,7 @@
 """
 import streamlit as st
 from config import APP_TITLE, APP_ICON, PAGE_CONFIG, COLORS
+from views.ai_dashboard import render_ai_dashboard
 
 # 页面配置（必须在最前面）
 st.set_page_config(**PAGE_CONFIG)
@@ -131,6 +132,7 @@ PAGES = {
     "news": render_news,
     "prediction": render_prediction,
     "batch_prediction": render_batch_prediction,
+    "ai_dashboard": render_ai_dashboard,
 }
 
 # 渲染当前页面

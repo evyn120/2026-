@@ -1,6 +1,6 @@
 """
 首页视图 - 功能模块卡片概览
-5个模块卡片，点击跳转详情页
+6个模块卡片，点击跳转详情页
 """
 import streamlit as st
 from config import COLORS
@@ -22,7 +22,7 @@ def render_home():
     st.markdown("### 🧭 功能导航")
     st.caption("点击按钮进入对应功能模块")
 
-    # 第一行：3个卡片
+    # ============ 第一行：3个卡片 ============
     col1, col2, col3 = st.columns(3, gap="large")
 
     with col1:
@@ -67,7 +67,7 @@ def render_home():
             st.session_state.page = "fund_flow"
             st.rerun()
 
-    # 第二行：2个卡片 + 1个空列
+    # ============ 第二行：3个卡片 ============
     col4, col5, col6 = st.columns(3, gap="large")
 
     with col4:
@@ -88,7 +88,7 @@ def render_home():
         st.markdown("""
         <div class="card">
             <div style="font-size:2.5rem; margin-bottom:8px;">🎯</div>
-            <h3 style="margin:0 0 6px; color:#1e293b;">投资预测</h3>
+            <h3 style="margin:0 0 6px; color:#1e293b;">单品种投资预测</h3>
             <p style="color:#64748b; font-size:0.9rem; margin:0;">
                 博主观点 · 综合评分<br/>方向判断 · 置信度
             </p>
@@ -100,17 +100,41 @@ def render_home():
 
     with col6:
         st.markdown("""
-        <div class="feature-card">
-            <div class="card-icon">🧮</div>
-            <h3>全品种截面预测</h3>
-            <p>遍历所有品种 · 多维度汇总<br/>方向排序 · 一表对比</p>
+        <div class="card">
+            <div style="font-size:2.5rem; margin-bottom:8px;">🧮</div>
+            <h3 style="margin:0 0 6px; color:#1e293b;">全品种截面预测</h3>
+            <p style="color:#64748b; font-size:0.9rem; margin:0;">
+                遍历所有品种 · 多维度汇总<br/>方向排序 · 一表对比
+            </p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("🧮 进入截面预测", key="nav_batch", use_container_width=True):
             st.session_state.page = "batch_prediction"
             st.rerun()
 
-    # 底部信息
+    # ============ 第三行：新增 AI 期货分析助手 + 2个占位 ============
+    col7, col8, col9 = st.columns(3, gap="large")
+
+    with col7:
+        st.markdown("""
+        <div class="card" style="border:1px solid rgba(99,102,241,0.25); 
+                                  background:linear-gradient(135deg,#eef2ff 0%,#f5f3ff 100%);">
+            <div style="font-size:2.5rem; margin-bottom:8px;">🤖</div>
+            <h3 style="margin:0 0 6px; color:#1e293b;">AI 期货分析助手</h3>
+            <p style="color:#64748b; font-size:0.9rem; margin:0;">
+                四维评分 · 否决规则<br/>布局/关注/等待 三档评级
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("🤖 进入 AI 期货分析助手", key="nav_ai_dash", use_container_width=True):
+            st.session_state.page = "ai_dashboard"
+            st.rerun()
+
+    # col8、col9 留空，未来扩展使用
+    # with col8: ...
+    # with col9: ...
+
+    # ============ 底部信息 ============
     st.markdown("---")
     footer_cols = st.columns(3)
     with footer_cols[0]:
