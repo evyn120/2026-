@@ -1,0 +1,555 @@
+{
+  "NVDA": {
+    "name": "NVIDIA",
+    "tag": "GPU · AI 训练 / 推论",
+    "yf": "NVDA",
+    "group": "GPU / 加速器",
+    "themes": [
+      "AI 加速器",
+      "AI 模型基建",
+      "Mag 7",
+      "Fabless IC"
+    ]
+  },
+  "AMD": {
+    "name": "AMD",
+    "tag": "GPU / CPU · MI300X",
+    "yf": "AMD",
+    "group": "GPU / 加速器",
+    "themes": [
+      "AI 加速器",
+      "Fabless IC"
+    ]
+  },
+  "AVGO": {
+    "name": "Broadcom",
+    "tag": "网通 · ASIC / 交换器",
+    "yf": "AVGO",
+    "group": "网路 Fabric",
+    "themes": [
+      "AI 加速器",
+      "Fabless IC",
+      "资讯安全"
+    ]
+  },
+  "MRVL": {
+    "name": "Marvell",
+    "tag": "资料中心 · DPU / 互连",
+    "yf": "MRVL",
+    "group": "网路 Fabric",
+    "themes": [
+      "AI 加速器",
+      "Fabless IC"
+    ]
+  },
+  "ANET": {
+    "name": "Arista",
+    "tag": "高速交换器 · 云端网路",
+    "yf": "ANET",
+    "group": "网路 Fabric",
+    "themes": [
+      "AI 模型基建"
+    ]
+  },
+  "SMCI": {
+    "name": "Super Micro",
+    "tag": "AI 伺服器 / 液冷整合",
+    "yf": "SMCI",
+    "group": "伺服器组装",
+    "themes": [
+      "AI 模型基建"
+    ]
+  },
+  "VRT": {
+    "name": "Vertiv",
+    "tag": "资料中心散热 / UPS",
+    "yf": "VRT",
+    "group": "电力 / 散热",
+    "themes": [
+      "AI 资料中心电力"
+    ]
+  },
+  "CEG": {
+    "name": "Constellation",
+    "tag": "核能电力 · AI 缺电题材",
+    "yf": "CEG",
+    "group": "电力 / 散热",
+    "themes": [
+      "AI 资料中心电力",
+      "核能"
+    ]
+  },
+  "ETN": {
+    "name": "Eaton",
+    "tag": "电力管理 · 配电",
+    "yf": "ETN",
+    "group": "电力 / 散热",
+    "themes": [
+      "AI 资料中心电力",
+      "工业"
+    ]
+  },
+  "VST": {
+    "name": "Vistra",
+    "tag": "发电 · 天然气/核能",
+    "yf": "VST",
+    "group": "电力 / 散热",
+    "themes": [
+      "AI 资料中心电力",
+      "核能"
+    ]
+  },
+  "EOSE": {
+    "name": "Eos Energy",
+    "tag": "储能 · 锌电池",
+    "yf": "EOSE",
+    "group": "电力 / 散热",
+    "themes": [
+      "储能",
+      "AI 资料中心电力"
+    ]
+  },
+  "MSFT": {
+    "name": "Microsoft",
+    "tag": "云端 Azure / Copilot",
+    "yf": "MSFT",
+    "group": "Hyperscalers",
+    "themes": [
+      "云三强",
+      "Mag 7",
+      "AI 模型",
+      "企业软体"
+    ]
+  },
+  "GOOGL": {
+    "name": "Alphabet",
+    "tag": "搜寻 / 广告 / GCP",
+    "yf": "GOOGL",
+    "group": "Hyperscalers",
+    "themes": [
+      "云三强",
+      "Mag 7",
+      "AI 模型",
+      "自驾 / Robotaxi",
+      "媒体 / 广告"
+    ]
+  },
+  "AMZN": {
+    "name": "Amazon",
+    "tag": "AWS / 电商",
+    "yf": "AMZN",
+    "group": "Hyperscalers",
+    "themes": [
+      "云三强",
+      "Mag 7",
+      "电商 / 消费"
+    ]
+  },
+  "META": {
+    "name": "Meta",
+    "tag": "社群 / Llama / Reality Labs",
+    "yf": "META",
+    "group": "Hyperscalers",
+    "themes": [
+      "Mag 7",
+      "AI 模型",
+      "媒体 / 广告"
+    ]
+  },
+  "ASML": {
+    "name": "ASML",
+    "tag": "微影设备 · EUV 垄断",
+    "yf": "ASML",
+    "group": "半导体设备",
+    "themes": [
+      "半导体设备"
+    ]
+  },
+  "AMAT": {
+    "name": "Applied Mat.",
+    "tag": "半导体设备 · 蚀刻沉积",
+    "yf": "AMAT",
+    "group": "半导体设备",
+    "themes": [
+      "半导体设备"
+    ]
+  },
+  "LRCX": {
+    "name": "Lam Research",
+    "tag": "半导体设备 · 蚀刻龙头",
+    "yf": "LRCX",
+    "group": "半导体设备",
+    "themes": [
+      "半导体设备"
+    ]
+  },
+  "KLAC": {
+    "name": "KLA Corp",
+    "tag": "半导体检测 / 量测",
+    "yf": "KLAC",
+    "group": "半导体设备",
+    "themes": [
+      "半导体设备"
+    ]
+  },
+  "TSM": {
+    "name": "TSMC ADR",
+    "tag": "晶圆代工 · 全球领导",
+    "yf": "TSM",
+    "group": "晶圆代工",
+    "themes": [
+      "AI 加速器",
+      "半导体代工"
+    ]
+  },
+  "QCOM": {
+    "name": "Qualcomm",
+    "tag": "手机 SoC / 5G",
+    "yf": "QCOM",
+    "group": "IC 设计",
+    "themes": [
+      "Fabless IC"
+    ]
+  },
+  "ARM": {
+    "name": "Arm Holdings",
+    "tag": "IP / 矽智财",
+    "yf": "ARM",
+    "group": "IC 设计",
+    "themes": [
+      "Fabless IC",
+      "AI 加速器"
+    ]
+  },
+  "MU": {
+    "name": "Micron",
+    "tag": "记忆体 · DRAM / HBM",
+    "yf": "MU",
+    "group": "记忆体",
+    "themes": [
+      "AI 模型基建"
+    ]
+  },
+  "SNPS": {
+    "name": "Synopsys",
+    "tag": "EDA · 晶片设计工具",
+    "yf": "SNPS",
+    "group": "EDA / IP 工具",
+    "themes": [
+      "半导体设计"
+    ]
+  },
+  "CDNS": {
+    "name": "Cadence",
+    "tag": "EDA · 矽智财 / 模拟",
+    "yf": "CDNS",
+    "group": "EDA / IP 工具",
+    "themes": [
+      "半导体设计"
+    ]
+  },
+  "CRWD": {
+    "name": "CrowdStrike",
+    "tag": "Cybersecurity · 端点防护",
+    "yf": "CRWD",
+    "group": "资讯安全",
+    "themes": [
+      "资讯安全",
+      "AI 应用"
+    ]
+  },
+  "PANW": {
+    "name": "Palo Alto Networks",
+    "tag": "Cybersecurity · Network/Cloud",
+    "yf": "PANW",
+    "group": "资讯安全",
+    "themes": [
+      "资讯安全"
+    ]
+  },
+  "ZS": {
+    "name": "Zscaler",
+    "tag": "Cybersecurity · Zero Trust SASE",
+    "yf": "ZS",
+    "group": "资讯安全",
+    "themes": [
+      "资讯安全"
+    ]
+  },
+  "FTNT": {
+    "name": "Fortinet",
+    "tag": "Cybersecurity · 防火墙/SD-WAN",
+    "yf": "FTNT",
+    "group": "资讯安全",
+    "themes": [
+      "资讯安全"
+    ]
+  },
+  "S": {
+    "name": "SentinelOne",
+    "tag": "Cybersecurity · AI 端点防护",
+    "yf": "S",
+    "group": "资讯安全",
+    "themes": [
+      "资讯安全",
+      "AI 应用"
+    ]
+  },
+  "RBRK": {
+    "name": "Rubrik",
+    "tag": "Cybersecurity · 资料安全/备份",
+    "yf": "RBRK",
+    "group": "资讯安全",
+    "themes": [
+      "资讯安全"
+    ]
+  },
+  "SNOW": {
+    "name": "Snowflake",
+    "tag": "Data Cloud · Warehouse",
+    "yf": "SNOW",
+    "group": "云基础 / 开发者工具",
+    "themes": [
+      "AI 模型基建",
+      "企业软体"
+    ]
+  },
+  "DDOG": {
+    "name": "Datadog",
+    "tag": "Observability · APM/Log",
+    "yf": "DDOG",
+    "group": "云基础 / 开发者工具",
+    "themes": [
+      "企业软体"
+    ]
+  },
+  "NET": {
+    "name": "Cloudflare",
+    "tag": "Edge CDN · Zero Trust",
+    "yf": "NET",
+    "group": "云基础 / 开发者工具",
+    "themes": [
+      "资讯安全",
+      "企业软体"
+    ]
+  },
+  "MDB": {
+    "name": "MongoDB",
+    "tag": "NoSQL DB · Atlas",
+    "yf": "MDB",
+    "group": "云基础 / 开发者工具",
+    "themes": [
+      "企业软体"
+    ]
+  },
+  "CRM": {
+    "name": "Salesforce",
+    "tag": "CRM / Sales Cloud",
+    "yf": "CRM",
+    "group": "企业软体 / Vertical SaaS",
+    "themes": [
+      "企业软体",
+      "AI 应用"
+    ]
+  },
+  "NOW": {
+    "name": "ServiceNow",
+    "tag": "Workflow Automation",
+    "yf": "NOW",
+    "group": "企业软体 / Vertical SaaS",
+    "themes": [
+      "企业软体",
+      "AI 应用"
+    ]
+  },
+  "WDAY": {
+    "name": "Workday",
+    "tag": "HR / Finance SaaS",
+    "yf": "WDAY",
+    "group": "企业软体 / Vertical SaaS",
+    "themes": [
+      "企业软体"
+    ]
+  },
+  "ADBE": {
+    "name": "Adobe",
+    "tag": "Creative Cloud · 内容软体",
+    "yf": "ADBE",
+    "group": "企业软体 / Vertical SaaS",
+    "themes": [
+      "企业软体",
+      "AI 应用"
+    ]
+  },
+  "ORCL": {
+    "name": "Oracle",
+    "tag": "资料库 / Oracle Cloud",
+    "yf": "ORCL",
+    "group": "企业软体 / Vertical SaaS",
+    "themes": [
+      "企业软体",
+      "AI 模型基建"
+    ]
+  },
+  "FIG": {
+    "name": "Figma",
+    "tag": "设计协作 SaaS",
+    "yf": "FIG",
+    "group": "企业软体 / Vertical SaaS",
+    "themes": [
+      "企业软体"
+    ]
+  },
+  "PLTR": {
+    "name": "Palantir",
+    "tag": "AI 应用 · Gov/Enterprise",
+    "yf": "PLTR",
+    "group": "AI 应用层",
+    "themes": [
+      "AI 应用",
+      "政府 / 国防",
+      "企业软体"
+    ]
+  },
+  "AI": {
+    "name": "C3.ai",
+    "tag": "Enterprise AI Apps",
+    "yf": "AI",
+    "group": "AI 应用层",
+    "themes": [
+      "AI 应用",
+      "企业软体"
+    ]
+  },
+  "SOUN": {
+    "name": "SoundHound AI",
+    "tag": "Voice AI · Auto/Restaurant",
+    "yf": "SOUN",
+    "group": "AI 应用层",
+    "themes": [
+      "AI 应用"
+    ]
+  },
+  "TSLA": {
+    "name": "Tesla",
+    "tag": "EV / 自驾 / Robotaxi",
+    "yf": "TSLA",
+    "group": "EV / 自驾",
+    "themes": [
+      "EV",
+      "自驾 / Robotaxi",
+      "Mag 7",
+      "AI 应用",
+      "储能"
+    ]
+  },
+  "AAPL": {
+    "name": "Apple",
+    "tag": "消费电子 · iPhone",
+    "yf": "AAPL",
+    "group": "消费电子",
+    "themes": [
+      "Mag 7",
+      "Fabless IC"
+    ]
+  },
+  "NFLX": {
+    "name": "Netflix",
+    "tag": "串流媒体",
+    "yf": "NFLX",
+    "group": "媒体 / 串流",
+    "themes": [
+      "媒体 / 广告"
+    ]
+  },
+  "JPM": {
+    "name": "JPMorgan",
+    "tag": "大型银行",
+    "yf": "JPM",
+    "group": "金融 / 银行",
+    "themes": [
+      "金融"
+    ]
+  },
+  "SOFI": {
+    "name": "SoFi",
+    "tag": "Fintech · 数位银行",
+    "yf": "SOFI",
+    "group": "金融科技",
+    "themes": [
+      "金融",
+      "AI 应用"
+    ]
+  },
+  "ASTS": {
+    "name": "AST SpaceMobile",
+    "tag": "卫星 · 直连手机",
+    "yf": "ASTS",
+    "group": "太空 / 国防",
+    "themes": [
+      "太空 / 卫星",
+      "政府 / 国防"
+    ]
+  },
+  "CAVA": {
+    "name": "Cava Group",
+    "tag": "地中海连锁快餐",
+    "yf": "CAVA",
+    "group": "餐饮 / 消费",
+    "themes": [
+      "消费"
+    ]
+  },
+  "TTI": {
+    "name": "Tetra Tech.",
+    "tag": "能源服务 · 油气/水管理",
+    "yf": "TTI",
+    "group": "能源 / 油气",
+    "themes": [
+      "能源"
+    ]
+  },
+  "IVV": {
+    "name": "iShares S&P 500",
+    "tag": "S&P 500 ETF",
+    "yf": "IVV",
+    "group": "大盘 ETF",
+    "themes": [
+      "大盘指数"
+    ]
+  },
+  "QQQ": {
+    "name": "Invesco QQQ",
+    "tag": "Nasdaq-100 ETF",
+    "yf": "QQQ",
+    "group": "大盘 ETF",
+    "themes": [
+      "大盘指数"
+    ]
+  },
+  "VTI": {
+    "name": "Vanguard Total",
+    "tag": "全市场 ETF",
+    "yf": "VTI",
+    "group": "大盘 ETF",
+    "themes": [
+      "大盘指数"
+    ]
+  },
+  "DXYZ": {
+    "name": "Destiny Tech100",
+    "tag": "Pre-IPO 科技基金",
+    "yf": "DXYZ",
+    "group": "特殊 ETF / 投资工具",
+    "themes": []
+  },
+  "TSLR": {
+    "name": "Defiance 2x TSLA",
+    "tag": "TSLA 2x 杠杆 ETF",
+    "yf": "TSLR",
+    "group": "特殊 ETF / 投资工具",
+    "themes": [
+      "EV"
+    ]
+  }
+}
