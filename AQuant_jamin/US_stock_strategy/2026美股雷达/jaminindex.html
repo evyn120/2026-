@@ -274,33 +274,6 @@
   .xhours-strip .state-pill.open  { color: var(--green); border-color: var(--green); }
   .xhours-strip .state-pill.closed{ color: var(--muted); }
 
-  /* ===== Options Panel ===== */
-  .opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
-  .opt-cell {
-    padding: 10px 12px; border-radius: 8px;
-    background: var(--bg-2); border: 1px solid var(--line);
-  }
-  .opt-cell .lbl { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
-  .opt-cell .val {
-    font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums;
-    margin-top: 2px;
-  }
-  .opt-cell .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .opt-cell.bullish { border-color: var(--green); }
-  .opt-cell.bearish { border-color: var(--red); }
-  .opt-unusual-row {
-    display: grid; grid-template-columns: 50px 80px 80px 80px 80px;
-    gap: 8px; padding: 6px 10px; font-size: 11px;
-    border-bottom: 1px solid rgba(42,42,74,0.4);
-    font-variant-numeric: tabular-nums;
-  }
-  .opt-unusual-row .side-call { color: var(--green); }
-  .opt-unusual-row .side-put { color: var(--red); }
-  @keyframes scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
   /* ====== STOCK TABS ====== */
   .tabs {
     display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
@@ -843,18 +816,6 @@
   .bt-metric .lbl { font-size: 11px; color: var(--muted); }
   .bt-metric .val { font-size: 22px; font-weight: 800; margin-top: 4px; }
 
-  /* ====== Insider panel ====== */
-  .insider-row {
-    display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--line);
-    align-items: center;
-  }
-  .insider-row:last-child { border-bottom: none; }
-  .insider-row .date { color: var(--muted); width: 80px; font-size: 11px; }
-  .insider-row .who { flex: 1; min-width: 0; }
-  .insider-row .val { font-weight: 700; min-width: 100px; text-align: right; }
-  .insider-row .val.buy { color: var(--red); }
-  .insider-row .val.sell { color: var(--green); }
-
   /* ====== AI panel ====== */
   .ai-panel {
     border: 1px solid var(--purple); border-radius: 14px; padding: 14px;
@@ -1206,34 +1167,6 @@
     </div>
   </div>
 
-  <!-- ===== Mascot + Stickers ===== -->
-  <div class="mascot-section">
-    <div class="mascot">
-      <div class="avatar"></div>
-      <div class="name">Q 版讲师</div>
-      <div class="role">情绪指引 · 轻量提示</div>
-      <div class="quote" id="mascotQuote">短线过热，今天先观望！别追高、等回测 20 日线再说 ✋</div>
-    </div>
-    <div class="stickers" id="stickers">
-      <div class="sticker bull"     data-q="量能不够别硬攻，先观察筹码动向。"><div class="icon">📈</div>涨起来！</div>
-      <div class="sticker neutral" data-q="先观望，等型态明朗再进场。"><div class="icon">🤔</div>先观望</div>
-      <div class="sticker neutral" data-q="日线、周线都看一下，多周期共振才稳。"><div class="icon">🔍</div>看 K 线</div>
-      <div class="sticker bull"     data-q="多头排列 + 量能配合，续攻机率高。"><div class="icon">👍</div>偏多中</div>
-      <div class="sticker warn"     data-q="高档爆量别追，等回测再说！"><div class="icon">🛑</div>别追高</div>
-      <div class="sticker bear"     data-q="支撑没破就分批接，停损要设紧。"><div class="icon">🪣</div>逢低接</div>
-      <div class="sticker bull"     data-q="20 日线是多头命脉，破了就先撤。"><div class="icon">🛡</div>守支撑</div>
-      <div class="sticker warn"     data-q="压力区密集成交，过不去就是反压。"><div class="icon">⚠️</div>压力大</div>
-      <div class="sticker neutral" data-q="MA、KD、MACD 三合一，讯号最可靠。"><div class="icon">📊</div>技术分析</div>
-      <div class="sticker neutral" data-q="量是价的先行指标，没量别幻想。"><div class="icon">📉</div>量能观察</div>
-      <div class="sticker neutral" data-q="外盘强就是买盘，内盘强就是卖压。"><div class="icon">⚖️</div>内外盘</div>
-      <div class="sticker warn"     data-q="没设停损的单，都是等被套的单。"><div class="icon">✋</div>停损要设</div>
-      <div class="sticker bull"     data-q="不贪高，落袋为安最安心。"><div class="icon">💰</div>小赚就好</div>
-      <div class="sticker neutral" data-q="震荡区用区间操作，不适合追单边。"><div class="icon">😵‍💫</div>震荡中</div>
-      <div class="sticker neutral" data-q="趋势、量能、筹码、策略，每天检讨。"><div class="icon">📝</div>收盘检讨</div>
-      <div class="sticker bull"     data-q="纪律 + 风控 = 长期稳稳赚。"><div class="icon">🏆</div>稳稳赚</div>
-    </div>
-  </div>
-
   <!-- ===== Bottom Strategy: 隔日操作剧本 ===== -->
   <div style="margin-bottom: 10px; font-weight:700; color:var(--cyan); letter-spacing:2px;">
     🎯 隔日操作剧本（参考）
@@ -1315,28 +1248,6 @@
     </div>
   </div>
 
-  <!-- ===== Insider + Institutional (13F) ===== -->
-  <div class="hero" style="grid-template-columns: 1fr 1fr; margin-bottom:16px;">
-    <div class="panel" style="margin-bottom:0;">
-      <div class="panel-title">
-        <span class="dot" style="background:var(--gold); box-shadow:0 0 10px var(--gold);"></span>
-        🐳 内部人交易
-        <span class="small">SEC Form 4 · 180 天</span>
-      </div>
-      <div id="insiderSummary" style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;"></div>
-      <div id="insiderList" style="font-size:12px; max-height:240px; overflow-y:auto;"></div>
-    </div>
-    <div class="panel" style="margin-bottom:0;">
-      <div class="panel-title">
-        <span class="dot" style="background:var(--purple); box-shadow:0 0 10px var(--purple);"></span>
-        🐋 机构持股 (13F)
-        <span class="small">Top 10 · yfinance</span>
-      </div>
-      <div id="instSummary" style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;"></div>
-      <div id="instList" style="font-size:12px; max-height:240px; overflow-y:auto;"></div>
-    </div>
-  </div>
-
   <!-- ===== 估值 (Valuation) ===== -->
   <div class="panel" style="margin-bottom:16px;">
     <div class="panel-title">
@@ -1346,26 +1257,6 @@
     </div>
     <div id="valnGrid" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
     <div id="valnNote" style="font-size:11px; color:var(--muted); margin-top:8px;"></div>
-  </div>
-
-  <!-- ===== Options Sentiment ===== -->
-  <div class="panel" style="margin-bottom:16px;">
-    <div class="panel-title">
-      <span class="dot" style="background:var(--orange); box-shadow:0 0 10px var(--orange);"></span>
-      🎲 选择权情绪
-      <span class="small">近月 · P/C 比 · 平均 IV · Max Pain · 异常成交</span>
-    </div>
-    <div id="optGrid" class="opt-grid">
-      <div class="opt-cell loading" style="grid-column:1/-1;color:var(--muted);text-align:center;">📡 点下方按钮载入</div>
-    </div>
-    <div id="optUnusualBox" style="display:none;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;">⚡ 异常成交 (vol > 3x OI)</div>
-      <div class="opt-unusual-row" style="border-bottom:1px solid var(--line);font-weight:600;color:var(--muted);">
-        <span>方向</span><span>履约</span><span>成交</span><span>OI</span><span>IV</span>
-      </div>
-      <div id="optUnusualList"></div>
-    </div>
-    <button class="btn" id="btnLoadOpt" style="margin-top:10px;">🎲 载入选择权资料</button>
   </div>
 
   <!-- ===== News ===== -->
@@ -1402,7 +1293,6 @@
         <div class="opt" data-by="fi">Strong Buy</div>
         <div class="opt" data-by="rsi">RSI 高</div>
         <div class="opt" data-by="rsi_low">RSI 低</div>
-        <div class="opt" data-by="inst">🐋 机构 %</div>
         <div class="opt" data-by="peg">💰 PEG</div>
         <div class="opt" data-by="relpe">💰 相对 PE</div>
       </div>
@@ -1424,7 +1314,7 @@
           <tr>
             <th>排名</th><th>🎯 分数</th><th>代号</th><th>名称</th><th>族群</th>
             <th>价格</th><th>涨跌幅</th><th>成交量</th>
-            <th>评等</th><th>RSI</th><th>趋势</th><th>🐋 机构%</th><th>💰 PEG / 相对 PE</th><th>讯号</th>
+            <th>评等</th><th>RSI</th><th>趋势</th><th>💰 PEG / 相对 PE</th><th>讯号</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -1548,26 +1438,6 @@
       <span style="font-size:12px; color:var(--muted);">跨族群聚合 · 同一档可属多主题 · 动量 = 1W − 1M/4</span>
     </div>
     <div id="themeContent">
-      <div style="color:var(--muted);text-align:center;padding:40px;">⏳ 载入中…</div>
-    </div>
-  </div>
-
-  <!-- ===== INSIDER CLUSTER VIEW ===== -->
-  <div class="cluster-view" id="clusterView">
-    <div class="rank-controls">
-      <span style="color:var(--gold); font-weight:700; letter-spacing:2px;">🐳 内部人群聚买进侦测</span>
-      <span class="spacer" style="flex:0 0 12px;"></span>
-      <label style="font-size:12px; color:var(--muted);">期间</label>
-      <select id="clusterDays" style="padding:5px 10px; background:var(--bg-2); color:var(--text); border:1px solid var(--line); border-radius:8px; font-size:12px;">
-        <option value="14">14 天</option>
-        <option value="30" selected>30 天</option>
-        <option value="60">60 天</option>
-        <option value="90">90 天</option>
-      </select>
-      <span class="spacer"></span>
-      <span style="font-size:12px; color:var(--muted);" id="clusterCount">—</span>
-    </div>
-    <div id="clusterContent">
       <div style="color:var(--muted);text-align:center;padding:40px;">⏳ 载入中…</div>
     </div>
   </div>
@@ -2115,7 +1985,6 @@ function switchView(v) {
   document.getElementById("squeezeView").classList.toggle("show", v === "squeeze");
   document.getElementById("riskView").classList.toggle("show", v === "risk");
   document.getElementById("hiloView").classList.toggle("show", v === "hilo");
-  document.getElementById("clusterView").classList.toggle("show", v === "cluster");
   document.getElementById("themeView").classList.toggle("show", v === "theme");
   document.getElementById("alertLogView").classList.toggle("show", v === "alertlog");
   document.getElementById("btView").classList.toggle("show", v === "bt");
@@ -2127,7 +1996,6 @@ function switchView(v) {
   else if (v === "squeeze") loadSqueeze();
   else if (v === "risk")    loadRisk();
   else if (v === "hilo")    loadHiLo();
-  else if (v === "cluster") loadCluster();
   else if (v === "theme")   loadTheme();
   else if (v === "alertlog") loadAlertLog();
   else if (v === "bt")      initBtView();
@@ -2374,64 +2242,6 @@ async function loadTheme() {
       c.addEventListener("click", (ev) => {
         ev.stopPropagation();
         state.activeCode = c.dataset.code;
-        switchView("stock");
-        loadStock(state.activeCode);
-      });
-    });
-  } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);text-align:center;padding:40px;">⚠️ ${e.message}</div>`;
-  }
-}
-
-/* =========================================================================
- * Insider Cluster
- * ======================================================================= */
-async function loadCluster() {
-  const days = document.getElementById("clusterDays").value || 30;
-  const el = document.getElementById("clusterContent");
-  const cnt = document.getElementById("clusterCount");
-  el.innerHTML = `<div style="color:var(--muted);text-align:center;padding:40px;">⏳ 载入中 (扫描 watchlist insider 交易)…</div>`;
-  cnt.textContent = "—";
-  try {
-    const data = await apiGet(`/api/insider-cluster?days=${days}`, 120000);
-    cnt.textContent = `${data.length} 档`;
-    if (!data || data.length === 0) {
-      el.innerHTML = `<div style="color:var(--muted);text-align:center;padding:40px;">📭 无群聚买进讯号</div>`;
-      return;
-    }
-    el.innerHTML = `
-      <div style="overflow-x:auto;">
-        <table class="rank-table">
-          <thead>
-            <tr>
-              <th>排名</th><th>分数</th><th>代号 / 名称</th><th>族群</th>
-              <th>买家人数</th><th>买进笔数</th><th>买进金额</th><th>净值</th><th>主要买家</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map((r, i) => {
-              const rankCls = i === 0 ? "gold" : i === 1 ? "silver" : i === 2 ? "bronze" : "normal";
-              const scCol = r.score >= 60 ? "var(--red)" : r.score >= 35 ? "var(--orange)" : "var(--cyan)";
-              const buyersStr = (r.top_buyers || []).slice(0, 3).join(", ");
-              return `
-                <tr data-code="${r.code}" style="cursor:pointer;">
-                  <td><span class="rank-num ${rankCls}">${i+1}</span></td>
-                  <td style="font-size:18px;font-weight:800;color:${scCol};">${r.score}</td>
-                  <td><strong style="color:var(--yellow);">${r.code}</strong><br><span style="font-size:11px;color:var(--muted);">${r.name}</span></td>
-                  <td style="font-size:11px;color:var(--muted);">${r.group}</td>
-                  <td style="font-weight:700;color:var(--gold);">${r.n_buyers} 人</td>
-                  <td>${r.buy_count}</td>
-                  <td style="color:var(--red);">$${(r.buy_value / 1e6).toFixed(2)}M</td>
-                  <td style="color:${r.net_value >= 0 ? 'var(--red)' : 'var(--green)'};">${r.net_value >= 0 ? '+' : ''}$${(r.net_value / 1e6).toFixed(2)}M</td>
-                  <td style="font-size:11px;color:var(--muted);max-width:300px;">${buyersStr}</td>
-                </tr>`;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>`;
-    el.querySelectorAll("tr[data-code]").forEach(tr => {
-      tr.addEventListener("click", () => {
-        state.activeCode = tr.dataset.code;
         switchView("stock");
         loadStock(state.activeCode);
       });
@@ -2791,71 +2601,6 @@ async function loadQuote(code) {
   }
 }
 
-/* =========================================================================
- * Options Sentiment
- * ======================================================================= */
-async function loadOptions() {
-  const code = state.activeCode;
-  if (!code) return;
-  const grid = document.getElementById("optGrid");
-  const ubox = document.getElementById("optUnusualBox");
-  grid.innerHTML = `<div class="opt-cell loading" style="grid-column:1/-1;color:var(--muted);text-align:center;">⏳ 载入中…</div>`;
-  ubox.style.display = "none";
-  try {
-    const d = await apiGet(`/api/options/${code}`, 30000);
-    const sent = d.sentiment;
-    const sentLabel = sent === "bullish" ? "🟢 偏多" : sent === "bearish" ? "🔴 偏空" : "⚪ 中性";
-    const pcCls = sent === "bullish" ? "bullish" : sent === "bearish" ? "bearish" : "";
-    const mpDiff = d.max_pain_diff_pct;
-    const mpDiffStr = mpDiff != null
-      ? `<span class="${mpDiff >= 0 ? 'pos' : 'neg'}">${mpDiff >= 0 ? '+' : ''}${mpDiff.toFixed(2)}% vs spot</span>`
-      : "";
-    grid.innerHTML = `
-      <div class="opt-cell ${pcCls}">
-        <div class="lbl">P/C VOL</div>
-        <div class="val">${d.pc_vol != null ? d.pc_vol.toFixed(2) : "—"}</div>
-        <div class="sub">${sentLabel}</div>
-      </div>
-      <div class="opt-cell">
-        <div class="lbl">P/C OI</div>
-        <div class="val">${d.pc_oi != null ? d.pc_oi.toFixed(2) : "—"}</div>
-        <div class="sub">未平仓比</div>
-      </div>
-      <div class="opt-cell">
-        <div class="lbl">CALL VOL / OI</div>
-        <div class="val" style="font-size:13px;">${d.call_vol.toLocaleString()} / ${d.call_oi.toLocaleString()}</div>
-        <div class="sub">IV ${d.call_iv != null ? (d.call_iv*100).toFixed(1)+'%' : '—'}</div>
-      </div>
-      <div class="opt-cell">
-        <div class="lbl">PUT VOL / OI</div>
-        <div class="val" style="font-size:13px;">${d.put_vol.toLocaleString()} / ${d.put_oi.toLocaleString()}</div>
-        <div class="sub">IV ${d.put_iv != null ? (d.put_iv*100).toFixed(1)+'%' : '—'}</div>
-      </div>
-      <div class="opt-cell">
-        <div class="lbl">MAX PAIN</div>
-        <div class="val">${d.max_pain != null ? d.max_pain.toFixed(2) : "—"}</div>
-        <div class="sub">${mpDiffStr}</div>
-      </div>
-      <div class="opt-cell">
-        <div class="lbl">EXPIRY</div>
-        <div class="val" style="font-size:13px;">${d.expiry || "—"}</div>
-        <div class="sub">spot ${d.spot ? d.spot.toFixed(2) : '—'}</div>
-      </div>`;
-    if (d.unusual && d.unusual.length > 0) {
-      ubox.style.display = "block";
-      document.getElementById("optUnusualList").innerHTML = d.unusual.map(u => `
-        <div class="opt-unusual-row">
-          <span class="side-${u.side}">${u.side === 'call' ? '📞 Call' : '📉 Put'}</span>
-          <span>${u.strike.toFixed(2)}</span>
-          <span>${u.vol.toLocaleString()}</span>
-          <span>${u.oi.toLocaleString()}</span>
-          <span>${u.iv != null ? (u.iv*100).toFixed(1)+'%' : '—'}</span>
-        </div>`).join("");
-    }
-  } catch (e) {
-    grid.innerHTML = `<div class="opt-cell loading" style="grid-column:1/-1;color:var(--red);text-align:center;">⚠️ ${e.message}</div>`;
-  }
-}
 
 /* =========================================================================
  * Load Stock
@@ -3036,12 +2781,6 @@ async function loadStock(code) {
     `${s.name}(${s.code}) ${s.trend}，${s.maStatus}，RSI ${s.rsi.toFixed(1)}，${s.volChange < 0 ? "量缩" : "量增"} ${s.volChange.toFixed(1)}%。` +
     `关键支撑 ${s.support[0]}、压力 ${s.resist[s.resist.length-1]}。讯号：${sigText}。${s.riskNote}`;
 
-  const quoteMap = {
-    high: "短线过热，今天先观望！别追高、等回测再说 ✋",
-    mid:  "技术面观察中，等量价配合再进场 🔍",
-    low:  "趋势明确 + 筹码稳，可以偏多操作 👍",
-  };
-  document.getElementById("mascotQuote").textContent = quoteMap[s.risk] || quoteMap.low;
 
   updatePatterns(s);
 
@@ -3084,8 +2823,6 @@ async function loadStock(code) {
   renderInstit(s);
   loadNews(s.code);
   loadFundamentals(s.code);
-  loadInsider(s.code);
-  loadInstitutional(s.code);
   loadValuation(s.code);
   loadQuote(s.code);
   renderRadar(s);
@@ -3447,7 +3184,6 @@ function bindToolbar() {
   document.getElementById("btnPfRefresh")?.addEventListener("click", refreshPortfolio);
   document.getElementById("btnBtRun").addEventListener("click", runBacktest);
   document.getElementById("btnBtOos")?.addEventListener("click", runBacktestOos);
-  document.getElementById("btnLoadOpt")?.addEventListener("click", loadOptions);
   document.getElementById("earnDays")?.addEventListener("change", loadEarnings);
   document.getElementById("clusterDays")?.addEventListener("change", loadCluster);
   document.getElementById("alertLogDays")?.addEventListener("change", loadAlertLog);
@@ -4216,113 +3952,6 @@ function tickTime() {
 }
 
 /* =========================================================================
- * Insider trading panel
- * ======================================================================= */
-async function loadInsider(code) {
-  const sumEl = document.getElementById("insiderSummary");
-  const listEl = document.getElementById("insiderList");
-  sumEl.innerHTML = `<div style="color:var(--muted); font-size:12px;">📡 载入中...</div>`;
-  listEl.innerHTML = "";
-  try {
-    const d = await apiGet(`/api/insider/${code}`, 20000);
-    const s = d.summary || {};
-    const fmt = n => "$" + Math.round(Math.abs(n)).toLocaleString();
-    const netColor = s.net_value > 0 ? "var(--red)" : "var(--green)";
-    sumEl.innerHTML = `
-      <div class="bt-metric" style="border-color:rgba(239,68,68,0.3);">
-        <div class="lbl">买进总额 (180d)</div>
-        <div class="val" style="color:var(--red);">${fmt(s.buy_value || 0)}</div>
-        <div style="font-size:11px; color:var(--muted);">${s.buy_count || 0} 笔</div>
-      </div>
-      <div class="bt-metric" style="border-color:rgba(34,197,94,0.3);">
-        <div class="lbl">卖出总额</div>
-        <div class="val" style="color:var(--green);">${fmt(s.sell_value || 0)}</div>
-        <div style="font-size:11px; color:var(--muted);">${s.sell_count || 0} 笔</div>
-      </div>
-      <div class="bt-metric">
-        <div class="lbl">净值 (买 − 卖)</div>
-        <div class="val" style="color:${netColor};">${(s.net_value || 0) >= 0 ? "+" : "-"}${fmt(s.net_value || 0)}</div>
-      </div>`;
-    if (!d.transactions || !d.transactions.length) {
-      listEl.innerHTML = `<div style="color:var(--muted); padding:14px; text-align:center;">😴 暂无近期内部人交易</div>`;
-      return;
-    }
-    listEl.innerHTML = d.transactions.map(t => {
-      const valColor = t.action === "buy" ? "buy" : t.action === "sell" ? "sell" : "";
-      const sign = t.action === "buy" ? "+" : t.action === "sell" ? "-" : "";
-      const valStr = t.value ? sign + "$" + Math.round(t.value).toLocaleString() : "—";
-      return `
-        <div class="insider-row">
-          <div class="date">${t.date}</div>
-          <div class="who">
-            <div style="font-weight:600;">${t.insider}</div>
-            <div style="font-size:10px; color:var(--muted);">${t.position}</div>
-          </div>
-          <div class="val ${valColor}">${valStr}<div style="font-size:10px; color:var(--muted); font-weight:400;">${t.shares.toLocaleString()} shares</div></div>
-        </div>`;
-    }).join("");
-  } catch (e) {
-    sumEl.innerHTML = `<div style="color:var(--red); font-size:12px;">载入失败: ${e.message}</div>`;
-  }
-}
-
-/* =========================================================================
- * Institutional holders panel (13F)
- * ======================================================================= */
-async function loadInstitutional(code) {
-  const sumEl = document.getElementById("instSummary");
-  const listEl = document.getElementById("instList");
-  sumEl.innerHTML = `<div style="color:var(--muted); font-size:12px;">📡 载入中（首次 5-15 秒）...</div>`;
-  listEl.innerHTML = "";
-  try {
-    const d = await apiGet(`/api/institutional/${code}`, 30000);
-    const s = d.summary || {};
-    sumEl.innerHTML = `
-      <div class="bt-metric" style="border-color:rgba(167,139,250,0.3); flex-basis: 110px;">
-        <div class="lbl">机构持股</div>
-        <div class="val" style="color:var(--purple); font-size:22px;">${s.pct_institutions}%</div>
-        <div style="font-size:10px; color:var(--muted);">${(s.n_institutions||0).toLocaleString()} 家机构</div>
-      </div>
-      <div class="bt-metric" style="flex-basis: 110px;">
-        <div class="lbl">Top10 集中度</div>
-        <div class="val" style="color:var(--cyan); font-size:22px;">${s.top10_pct}%</div>
-        <div style="font-size:10px; color:var(--muted);">前 10 大持股加总</div>
-      </div>
-      <div class="bt-metric" style="flex-basis: 110px;">
-        <div class="lbl">内部人持股</div>
-        <div class="val" style="color:var(--gold); font-size:22px;">${s.pct_insider}%</div>
-        <div style="font-size:10px; color:var(--muted);">高管+大股东</div>
-      </div>`;
-    if (!d.institutional || !d.institutional.length) {
-      listEl.innerHTML = `<div style="color:var(--muted); padding:14px; text-align:center;">😴 暂无机构持股资料</div>`;
-      return;
-    }
-    const fmt = v => v >= 1e9 ? `$${(v/1e9).toFixed(2)}B` : v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : `$${v.toLocaleString()}`;
-    listEl.innerHTML = d.institutional.map((h, i) => {
-      const chCls = h.pct_change > 0 ? "buy" : h.pct_change < 0 ? "sell" : "";
-      const chSign = h.pct_change > 0 ? "↑+" : h.pct_change < 0 ? "↓" : "";
-      const chStr = h.pct_change !== 0 ? `${chSign}${h.pct_change.toFixed(1)}%` : "—";
-      return `
-        <div class="insider-row">
-          <div style="width:24px; color:var(--muted); font-size:11px;">#${i+1}</div>
-          <div class="who">
-            <div style="font-weight:600; font-size:12px;">${h.holder}</div>
-            <div style="font-size:10px; color:var(--muted);">
-              ${(h.shares/1e6).toFixed(1)}M shares · ${fmt(h.value)} · ${h.date || ''}
-            </div>
-          </div>
-          <div class="val ${chCls}" style="min-width:80px;">
-            ${h.pct_held.toFixed(2)}%
-            <div style="font-size:10px; font-weight:400;">${chStr}</div>
-          </div>
-        </div>`;
-    }).join("");
-  } catch (e) {
-    sumEl.innerHTML = `<div style="color:var(--red); font-size:12px;">载入失败: ${e.message}</div>`;
-  }
-}
-
-/* =========================================================================
  * Valuation panel (P/E, PEG, P/B + 族群相对位置)
  * ======================================================================= */
 async function loadValuation(code) {
@@ -4407,12 +4036,10 @@ async function renderRadar(s) {
   // 4. 胜率 — 直接用 win_rate
   // 5. 讯号 (净多头) — 多头讯号数 - 空头讯号数 normalized
   // 6. 风险倒数 — 低 RSI 过热 + 低乖离 = 高分
-  let inst_pct = 0, peg = null;
+  let peg = null;
   try {
     const v = await apiGet(`/api/valuation/${s.code}`, 15000);
     peg = v.peg;
-    const ih = await apiGet(`/api/institutional/${s.code}`, 15000);
-    inst_pct = (ih.summary || {}).pct_institutions || 0;
   } catch {}
 
   // 1. 技术
@@ -4425,7 +4052,6 @@ async function renderRadar(s) {
     0, 100
   );
   // 2. 筹码
-  const chipScore = _clamp(inst_pct * 1.1, 0, 100);
   // 3. 估值
   const valScore = peg == null || peg <= 0 ? 30 :
                    peg <= 0.5 ? 100 :
@@ -4451,7 +4077,6 @@ async function renderRadar(s) {
     radar: {
       indicator: [
         { name: "技术",      max: 100 },
-        { name: "筹码",      max: 100 },
         { name: "估值",      max: 100 },
         { name: "胜率",      max: 100 },
         { name: "讯号",      max: 100 },
@@ -4466,7 +4091,7 @@ async function renderRadar(s) {
     series: [{
       type: "radar",
       data: [{
-        value: [techScore, chipScore, valScore, winScore, sigScore, riskInv],
+        value: [techScore, valScore, winScore, sigScore, riskInv],
         name: s.name,
         symbol: "circle",
         symbolSize: 5,
@@ -4480,7 +4105,7 @@ async function renderRadar(s) {
   radarChart.setOption(opt, true);
 
   // 解读文字
-  const scores = { 技术: techScore, 筹码: chipScore, 估值: valScore, 胜率: winScore, 讯号: sigScore, 风险倒数: riskInv };
+  const scores = { 技术: techScore,  估值: valScore, 胜率: winScore, 讯号: sigScore, 风险倒数: riskInv };
   const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   const strongest = sorted.slice(0, 2);
   const weakest = sorted.slice(-2).reverse();

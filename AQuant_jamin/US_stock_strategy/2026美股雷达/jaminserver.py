@@ -108,9 +108,11 @@ def get_history(code_or_yf: str, limit: int | None = None,
     sql = (f"SELECT trade_date, `open`, `high`, `low`, `close`, `volume`, `pre_close` "
            f"FROM `{table}` {where_sql} ORDER BY trade_date ASC")
     try:
-        conn = _mysql_conn()
-        df = pd.read_sql(sql, conn, params=params or None)
-        conn.close()
+        # conn = _mysql_conn()
+        # df = pd.read_sql(sql, conn, params=params or None)
+        # conn.close()
+        from sqlalchemy import text
+        df = pd.read_sql(text(sql), _ENGINE, params=params or None)
     except Exception as e:
         print(f"[mysql] 读取 {table} 失败: {e}")
         return pd.DataFrame()
@@ -126,6 +128,41 @@ def get_history(code_or_yf: str, limit: int | None = None,
     if limit:
         df = df.iloc[-limit:]
     return df
+def get_etf_history(code: str, start=None, end=None) -> pd.DataFrame:
+    """从 us-stock-intel 库的 etf 合表读单只 ETF 日线 (SPY / RSP 等)。
+    etf 表: code(带后缀如 SPY.P) / date / open/high/low/close/volume/pre_close。
+    返回 DatetimeIndex + Open/High/Low/Close/Volume，取不到回空 DataFrame。"""
+    base = code.strip().upper().split(".")[0]
+    candidates = [base, base + ".P", base + ".O", base + ".N", base + ".A"]
+    where = ["code = %s"]; params = [None]
+    extra, eparams = [], []
+    if start:
+        extra.append("date >= %s"); eparams.append(str(start)[:10])
+    if end:
+        extra.append("date <= %s"); eparams.append(str(end)[:10])
+    extra_sql = (" AND " + " AND ".join(extra)) if extra else ""
+    for cand in candidates:
+        sql = (f"SELECT date, `open`, `high`, `low`, `close`, `volume`, `pre_close` "
+               f"FROM `etf` WHERE code = %s{extra_sql} ORDER BY date ASC")
+        try:
+            conn = _mysql_conn()
+            df = pd.read_sql(sql, conn, params=[cand] + eparams)
+            conn.close()
+        except Exception as e:
+            print(f"[etf] 读取 {cand} 失败: {e}")
+            continue
+        if not df.empty:
+            df["date"] = pd.to_datetime(df["date"])
+            df = df.set_index("date").sort_index()
+            df = df.rename(columns={"open": "Open", "high": "High", "low": "Low",
+                                    "close": "Close", "volume": "Volume",
+                                    "pre_close": "PreClose"})
+            for c in ("Open", "High", "Low", "Close"):
+                df[c] = df[c].astype(float)
+            df["Volume"] = df["Volume"].fillna(0).astype("int64")
+            return df
+    return pd.DataFrame()
+
 def get_financials_latest(ths_code: str) -> dict | None:
     """从 stock_financials 取某代号最新一季快照 (给估值指标用)。
     ths_code 用带后缀的代号 (如 AAPL.O)；自动做大小写与后缀容错。"""
@@ -1075,168 +1112,6 @@ def fetch_news(code: str) -> list:
     cache_set_ttl(f"news:{code}", out, 3600)  # 1 小时 — 翻译+情感不需要 5 分钟更新
     return out
 
-
-# ----------------------------------------------------------------------------
-# 内部人交易 (yfinance.Ticker.insider_transactions，免 key 即时)
-# ----------------------------------------------------------------------------
-def fetch_insider(code: str, days: int = 180) -> dict:
-    """近 N 天的 SEC Form 4 内部人交易，分类 buy/sell 并算净值。
-    cache 1 小时（内部人通常几天才动一次）。
-    """
-    cache_key = f"insider:{code}:{days}"
-    cached = cache_get(cache_key)
-    if cached:
-        return cached
-
-    wl = load_watchlist()
-    info = wl.get(code)
-    if not info:
-        return {"transactions": [], "summary": {"buy_value": 0, "sell_value": 0, "net_value": 0,
-                                                  "buy_count": 0, "sell_count": 0}}
-    try:
-        df = yf.Ticker(info["yf"]).insider_transactions
-    except Exception as e:
-        print(f"[insider] {code}: {e}")
-        df = None
-    if df is None or df.empty:
-        out = {"transactions": [], "summary": {"buy_value": 0, "sell_value": 0, "net_value": 0,
-                                                 "buy_count": 0, "sell_count": 0}}
-        cache_set(cache_key, out)
-        return out
-
-    df = df.copy()
-    df["Start Date"] = pd.to_datetime(df["Start Date"], errors="coerce")
-    df = df.dropna(subset=["Start Date"])
-    cutoff = pd.Timestamp.today() - pd.Timedelta(days=days)
-    df = df[df["Start Date"] >= cutoff].sort_values("Start Date", ascending=False)
-
-    buy_total = 0.0
-    sell_total = 0.0
-    txs = []
-    for _, r in df.iterrows():
-        txt = str(r.get("Text", ""))
-        if "Purchase" in txt or "Buy" in txt:
-            action = "buy"
-        elif "Sale" in txt or "Sell" in txt or "Sold" in txt:
-            action = "sell"
-        else:
-            action = "other"
-        # yfinance 某些纪录（如赠与、选择权行权）的 Value/Shares 可能是 NaN
-        raw_val = r.get("Value")
-        val = float(raw_val) if raw_val is not None and not pd.isna(raw_val) else 0.0
-        raw_sh = r.get("Shares")
-        shares = int(raw_sh) if raw_sh is not None and not pd.isna(raw_sh) else 0
-        if action == "buy":  buy_total += val
-        elif action == "sell": sell_total += val
-        txs.append({
-            "date":     r["Start Date"].strftime("%Y-%m-%d"),
-            "insider":  str(r.get("Insider", "")),
-            "position": str(r.get("Position", "")),
-            "action":   action,
-            "shares":   shares,
-            "value":    int(val),
-            "text":     txt[:60],
-        })
-
-    net = buy_total - sell_total
-    out = {
-        "code": code,
-        "days": days,
-        "transactions": txs[:30],
-        "summary": {
-            "buy_value":  int(buy_total),
-            "sell_value": int(sell_total),
-            "net_value":  int(net),
-            "buy_count":  sum(1 for t in txs if t["action"] == "buy"),
-            "sell_count": sum(1 for t in txs if t["action"] == "sell"),
-            "total_count": len(txs),
-        }
-    }
-    # cache 1 小时
-    _cache[cache_key] = (time.time() + 3600 - CACHE_TTL, out)
-    return out
-
-
-# ----------------------------------------------------------------------------
-# 13F 机构持股 (yfinance Ticker.institutional_holders / major_holders)
-# ----------------------------------------------------------------------------
-def fetch_institutional_holders(code: str) -> dict:
-    """Top 10 机构持股 + Top 5 mutual fund + 整体机构/内部人 %。
-    SEC 13F 是季报延迟 45 天，cache 6 小时即可。
-    """
-    cache_key = f"inst13f:{code}"
-    cached = cache_get(cache_key)
-    if cached:
-        return cached
-
-    wl = load_watchlist()
-    info = wl.get(code)
-    if not info:
-        raise HTTPException(404)
-    try:
-        t = yf.Ticker(info["yf"])
-        inst_df = t.institutional_holders
-        mf_df   = t.mutualfund_holders
-        major   = t.major_holders
-    except Exception as e:
-        print(f"[13F] {code}: {e}")
-        inst_df = mf_df = major = None
-
-    def parse_holder(df, top_n):
-        out = []
-        if df is None or df.empty:
-            return out
-        for _, r in df.head(top_n).iterrows():
-            shares = r.get("Shares")
-            value  = r.get("Value")
-            pct_h  = r.get("pctHeld")
-            pct_c  = r.get("pctChange")
-            date_r = r.get("Date Reported")
-            out.append({
-                "holder":     str(r.get("Holder", "")),
-                "shares":     int(shares) if pd.notna(shares) else 0,
-                "value":      int(value)  if pd.notna(value)  else 0,
-                "pct_held":   round(float(pct_h) * 100, 2) if pd.notna(pct_h) else 0,
-                "pct_change": round(float(pct_c) * 100, 2) if pd.notna(pct_c) else 0,
-                "date":       str(date_r) if pd.notna(date_r) else "",
-            })
-        return out
-
-    inst = parse_holder(inst_df, 10)
-    mf   = parse_holder(mf_df, 5)
-
-    pct_insider = pct_institutions = 0.0
-    n_institutions = 0
-    if major is not None and not major.empty:
-        try:
-            if "insidersPercentHeld" in major.index:
-                pct_insider = float(major.loc["insidersPercentHeld"].iloc[0]) * 100
-            if "institutionsPercentHeld" in major.index:
-                pct_institutions = float(major.loc["institutionsPercentHeld"].iloc[0]) * 100
-            if "institutionsCount" in major.index:
-                n_institutions = int(major.loc["institutionsCount"].iloc[0])
-        except Exception:
-            pass
-
-    top10_pct = sum(h["pct_held"] for h in inst)
-
-    out = {
-        "code": code,
-        "institutional": inst,
-        "mutualfund":    mf,
-        "summary": {
-            "pct_insider":      round(pct_insider, 2),
-            "pct_institutions": round(pct_institutions, 2),
-            "top10_pct":        round(top10_pct, 2),
-            "n_institutions":   n_institutions,
-            "n_top_holders":    len(inst),
-        }
-    }
-    # cache 6 小时 (13F 季报，每天顶多动一两家)
-    _cache[cache_key] = (time.time() + 6 * 3600 - CACHE_TTL, out)
-    return out
-
-
 # ----------------------------------------------------------------------------
 # 估值指标 (yfinance Ticker.info) + 同族群相对位置
 # ----------------------------------------------------------------------------
@@ -1345,25 +1220,6 @@ def fetch_valuation_ranking() -> list:
 
     cache_set(cache_key, items)
     return items
-
-
-def insider_signals(code: str) -> list[dict]:
-    """从近 90 日内部人交易产生讯号徽章。"""
-    try:
-        ins = fetch_insider(code, days=90)
-    except Exception:
-        return []
-    s = ins.get("summary", {})
-    net = s.get("net_value", 0)
-    sigs = []
-    if net >= 500_000:
-        sigs.append({"key": "insider_buy", "label": "🐳 内部人大买", "color": "red"})
-    elif net <= -5_000_000:
-        sigs.append({"key": "insider_sell_heavy", "label": "📉 内部人大卖", "color": "green"})
-    elif net <= -1_000_000:
-        sigs.append({"key": "insider_sell", "label": "⚠️ 内部人卖超", "color": "orange"})
-    return sigs
-
 
 # ----------------------------------------------------------------------------
 # 探测股票代号 (.TW 或 .TWO)
@@ -1716,8 +1572,6 @@ def fetch_summary(code: str) -> dict:
     rsi_s  = rsi_indicator(closes, 14)
     k_s, d_s = kd_indicator(hist, 9)
     sigs = detect_signals(closes, ma5_s, ma20_s, k_s, d_s, rsi_s, hist["High"], hist["Low"], period="D")
-    # 加上内部人讯号（cache 1 hr，不会拖慢 summary 列表）
-    sigs.extend(insider_signals(code))
 
     # 短线胜率启发式 (与前端 winRate 计算一致)
     rsi_v = float(rsi_s.iloc[-1]) if not pd.isna(rsi_s.iloc[-1]) else 50.0
@@ -1785,17 +1639,6 @@ def api_stock(code: str, period: str = "D"):
 @app.get("/api/news/{code}")
 def api_news(code: str):
     return fetch_news(code)
-
-
-@app.get("/api/insider/{code}")
-def api_insider(code: str, days: int = 180):
-    return fetch_insider(code, days=days)
-
-
-@app.get("/api/institutional/{code}")
-def api_institutional(code: str):
-    """Top 10 机构持股 + Top 5 mutual fund + 整体 % (13F 来自 yfinance)。"""
-    return fetch_institutional_holders(code)
 
 
 @app.get("/api/valuation/{code}")
@@ -1947,12 +1790,7 @@ def api_ranking(by: str = "change", weights: str = "balanced"):
             bias = (d["price"] - ma20) / ma20 * 100 if ma20 else 0
             # 13F 共识度（cache 6 hr）
             inst_pct = inst_top10 = 0
-            try:
-                ih = fetch_institutional_holders(code)
-                inst_pct   = ih["summary"].get("pct_institutions", 0)
-                inst_top10 = ih["summary"].get("top10_pct", 0)
-            except Exception:
-                pass
+
             # 估值指标 (cache 6 hr)
             peg = pe = pe_vs_group = None
             try:
@@ -2151,8 +1989,6 @@ def api_ranking(by: str = "change", weights: str = "balanced"):
         "win":      lambda x: -x["win_rate"],
         "signals":  lambda x: -x["signal_count"],
         "bias":     lambda x: -abs(x["bias"]),
-        "inst":     lambda x: -x["inst_pct"],
-        "inst10":   lambda x: -x["inst_top10"],
         "rs1d":     _rs1d,                             # 📊 族群相对强度 1d
         "rs5d":     _rs5d,                             # 📊 族群相对强度 5d
         "rs20d":    _rs20,                             # 📊 族群相对强度 20d
@@ -2738,33 +2574,6 @@ def api_ai_comment(code: str):
 
     sigs = "、".join(s["label"] for s in d.get("signals", [])) or "无强烈讯号"
 
-    # 内部人交易具体数字 (近 6 个月)
-    insider_line = ""
-    try:
-        ins = fetch_insider(code, days=180)
-        s = ins["summary"]
-        if s.get("total_count", 0) > 0:
-            net = s["net_value"]
-            net_str = f"+${net/1e6:.1f}M" if net >= 0 else f"-${abs(net)/1e6:.1f}M"
-            insider_line = (f"\n内部人 6 个月：净值 {net_str}"
-                            f"（买 {s['buy_count']} 笔 ${s['buy_value']/1e6:.1f}M, "
-                            f"卖 {s['sell_count']} 笔 ${s['sell_value']/1e6:.1f}M）")
-    except Exception:
-        pass
-
-    # 13F 机构持股共识度
-    inst_line = ""
-    try:
-        ih = fetch_institutional_holders(code)
-        isum = ih["summary"]
-        if isum.get("pct_institutions", 0) > 0:
-            top_holder = ih["institutional"][0]["holder"] if ih.get("institutional") else "—"
-            inst_line = (f"\n13F 机构共识：总机构 {isum['pct_institutions']}% / "
-                         f"Top 10 集中 {isum['top10_pct']}% / 内部人 {isum['pct_insider']}% "
-                         f"(最大持有: {top_holder[:30]})")
-    except Exception:
-        pass
-
     # 使用者持股 + 移动停利建议
     pos = ""
     if holdings_of_code:
@@ -2798,7 +2607,7 @@ RSI(14) = {d['rsi']}, KD(9,3) K/D = {d['kd_k']}/{d['kd_d']}, MACD {d['macd']}
 量能变化 {d['volChange']:+.1f}%（5 日均量 {d['avgVol']:,} 股）
 分析师评等：Strong Buy 累计 {d['chip']['fi_10']} 家、Buy {d['chip']['it_10']} 家
 近期讯号：{sigs}
-压力 ${d['resist']} / 支撑 ${d['support']}{insider_line}{inst_line}{pos}
+压力 ${d['resist']} / 支撑 ${d['support']}{pos}
 """
     try:
         text = _gemini_call(key, prompt)   # 已别名到 DeepSeek
@@ -3737,16 +3546,18 @@ def api_breadth():
     # SPY vs RSP 等权重 (宽度近似)
     spy_rsp = None
     spy_chg = rsp_chg = None
+    # ↓↓↓ 新代码（改用本地 etf 表）↓↓↓
     try:
         end = pd.Timestamp.today()
         start = end - pd.Timedelta(days=10)
-        sp_data = yf.download(["SPY", "RSP"], start=start, end=end, auto_adjust=False, progress=False, group_by="ticker", threads=True)
-        spy_c = sp_data["SPY"]["Close"]
-        rsp_c = sp_data["RSP"]["Close"]
+        spy_h = get_etf_history("SPY", start=start, end=end)
+        rsp_h = get_etf_history("RSP", start=start, end=end)
+        spy_c = spy_h["Close"] if not spy_h.empty else pd.Series(dtype=float)
+        rsp_c = rsp_h["Close"] if not rsp_h.empty else pd.Series(dtype=float)
         if len(spy_c) >= 2 and len(rsp_c) >= 2:
             spy_chg = float((spy_c.iloc[-1] - spy_c.iloc[-2]) / spy_c.iloc[-2] * 100)
             rsp_chg = float((rsp_c.iloc[-1] - rsp_c.iloc[-2]) / rsp_c.iloc[-2] * 100)
-            spy_rsp = round(spy_chg - rsp_chg, 2)  # 正 = 龙头股拉,负 = 中小盘拉
+            spy_rsp = round(spy_chg - rsp_chg, 2)  # 正=龙头股拉，负=中小盘拉
     except Exception as e:
         print(f"[breadth spy/rsp] {e}")
 
@@ -3855,62 +3666,6 @@ def api_52w_scan():
     }
     cache_set(cache_key, out)
     return out
-
-
-# ============================================================================
-# Insider Cluster Buying — 跨档群聚买进侦测
-# ============================================================================
-@app.get("/api/insider-cluster")
-def api_insider_cluster(days: int = 30):
-    """侦测 N 天内多个 insider 集中买进的股票。"""
-    cache_key = f"insider_cluster:{days}"
-    cached = cache_get(cache_key)
-    if cached:
-        return cached
-
-    wl = load_watchlist()
-    out = []
-    for code in wl:
-        try:
-            r = fetch_insider(code, days=days)
-        except Exception:
-            continue
-        s = r.get("summary", {})
-        buys = [t for t in r.get("transactions", []) if t.get("action") == "buy"]
-        # 不同 insider 的人数
-        buyers = set(t.get("insider") for t in buys if t.get("insider"))
-        n_buyers = len(buyers)
-        buy_count = len(buys)
-        buy_value = s.get("buy_value", 0) or 0
-        # 评分：人数 >= 2 + 总额大 = 群聚讯号
-        if n_buyers < 2 or buy_value < 100000:
-            continue
-        score = 0
-        if n_buyers >= 5: score += 40
-        elif n_buyers >= 3: score += 25
-        elif n_buyers >= 2: score += 15
-        if buy_value >= 5_000_000: score += 30
-        elif buy_value >= 1_000_000: score += 20
-        elif buy_value >= 500_000: score += 10
-        # 净流入 (买 - 卖) 为正再加分
-        net = s.get("net_value", 0) or 0
-        if net > 0: score += 10
-        info = wl.get(code, {})
-        out.append({
-            "code":       code,
-            "name":       info.get("name", code),
-            "group":      info.get("group", "—"),
-            "n_buyers":   n_buyers,
-            "buy_count":  buy_count,
-            "buy_value":  buy_value,
-            "net_value":  net,
-            "top_buyers": list(buyers)[:5],
-            "score":      score,
-        })
-    out.sort(key=lambda x: -x["score"])
-    cache_set(cache_key, out)
-    return out
-
 
 # ============================================================================
 # 投组 Drawdown 曲线 — 每档近 60d 从高点回档轨迹
@@ -4137,25 +3892,6 @@ def api_profit_taking_scan():
         if ret_5d and ret_5d > 8: cond_a_reasons.append(f"5日 +{ret_5d:.1f}%")
         cond_a = len(cond_a_reasons) > 0
 
-        # === Condition B: 筹码散 ===
-        cond_b_reasons = []
-        try:
-            ins = fetch_insider(code, days=180)
-            net = ins.get("summary", {}).get("net_value", 0)
-            if net <= -1_000_000:
-                cond_b_reasons.append(f"内部人 6M 净卖 ${abs(net)/1e6:.1f}M")
-        except Exception:
-            pass
-        try:
-            ih = fetch_institutional_holders(code)
-            isum = ih.get("summary", {})
-            top10 = isum.get("top10_pct", 0)
-            if top10 and top10 < 30:
-                cond_b_reasons.append(f"Top10 集中度只 {top10}%")
-        except Exception:
-            pass
-        cond_b = len(cond_b_reasons) > 0
-
         # === Condition C: 支撑脆弱 ===
         cond_c_reasons = []
         if ma20 and price < ma20:
@@ -4169,7 +3905,7 @@ def api_profit_taking_scan():
                 cond_c_reasons.append(f"距高点 {dd:.1f}% (${peak:.2f}→${price:.2f})")
         cond_c = len(cond_c_reasons) > 0
 
-        hits = sum([cond_a, cond_b, cond_c])
+        hits = sum([cond_a, cond_c])
         if hits == 0:
             continue  # 完全没事的不列出
 
@@ -4716,188 +4452,72 @@ def api_earnings_calendar(days: int = 30):
     return out
 
 
-# ============================================================================
-# 选择权情绪：P/C ratio、IV、Max Pain
-# ============================================================================
-@app.get("/api/options/{code}")
-def api_options(code: str):
-    """近月选择权情绪：总 call/put 量、P/C ratio、平均 IV、Max Pain。"""
-    cache_key = f"options:{code}"
-    cached = cache_get(cache_key)
-    if cached:
-        return cached
-
-    wl = load_watchlist()
-    info = wl.get(code)
-    if not info:
-        raise HTTPException(404, "code not in watchlist")
-    yf_code = info.get("yf", code)
-
-    try:
-        t = yf.Ticker(yf_code)
-        expiries = list(t.options or [])
-        if not expiries:
-            raise HTTPException(503, "无选择权资料")
-
-        # 近月（第一个到期日）
-        nearest = expiries[0]
-        ch = t.option_chain(nearest)
-        calls = ch.calls
-        puts  = ch.puts
-
-        # 抓即时价当参考
-        spot = None
-        try:
-            h = t.history(period="2d", auto_adjust=False)
-            if not h.empty:
-                spot = float(h.iloc[-1]["Close"])
-        except Exception:
-            pass
-
-        call_vol = int(calls["volume"].fillna(0).sum())
-        put_vol  = int(puts["volume"].fillna(0).sum())
-        call_oi  = int(calls["openInterest"].fillna(0).sum())
-        put_oi   = int(puts["openInterest"].fillna(0).sum())
-
-        pc_vol = round(put_vol / call_vol, 2) if call_vol else None
-        pc_oi  = round(put_oi  / call_oi, 2)  if call_oi  else None
-
-        # 平均 IV (价量加权)
-        def _wiv(df):
-            if df.empty: return None
-            iv = df["impliedVolatility"].fillna(0)
-            w  = df["volume"].fillna(0)
-            tot = w.sum()
-            if tot == 0:
-                return float(iv.mean()) if len(iv) > 0 else None
-            return float((iv * w).sum() / tot)
-        call_iv = _wiv(calls)
-        put_iv  = _wiv(puts)
-
-        # Max Pain: 找一个 strike，让所有 OI 的痛苦总和最小
-        strikes = sorted(set(list(calls["strike"]) + list(puts["strike"])))
-        max_pain = None
-        if strikes:
-            best = None
-            for K in strikes:
-                pain_c = ((K - calls["strike"]).clip(lower=0) * calls["openInterest"].fillna(0)).sum()
-                pain_p = ((puts["strike"] - K).clip(lower=0) * puts["openInterest"].fillna(0)).sum()
-                total = float(pain_c + pain_p)
-                if best is None or total < best[1]:
-                    best = (K, total)
-            max_pain = float(best[0]) if best else None
-
-        # 异常成交（vol > 3x OI 的合约）— 取最热前 5
-        unusual = []
-        for df, side in [(calls, "call"), (puts, "put")]:
-            d = df.copy()
-            d["volume"] = d["volume"].fillna(0)
-            d["openInterest"] = d["openInterest"].fillna(0)
-            d = d[(d["openInterest"] > 0) & (d["volume"] > 3 * d["openInterest"])]
-            for _, row in d.nlargest(3, "volume").iterrows():
-                unusual.append({
-                    "side":   side,
-                    "strike": float(row["strike"]),
-                    "vol":    int(row["volume"]),
-                    "oi":     int(row["openInterest"]),
-                    "iv":     float(row["impliedVolatility"]) if not pd.isna(row["impliedVolatility"]) else None,
-                })
-        unusual.sort(key=lambda x: -x["vol"])
-        unusual = unusual[:5]
-
-        # 情绪结论
-        sentiment = "neutral"
-        if pc_vol is not None:
-            if pc_vol < 0.7:    sentiment = "bullish"
-            elif pc_vol > 1.3:  sentiment = "bearish"
-
-        out = {
-            "code":     code,
-            "expiry":   nearest,
-            "spot":     spot,
-            "call_vol": call_vol, "put_vol": put_vol,
-            "call_oi":  call_oi,  "put_oi":  put_oi,
-            "pc_vol":   pc_vol,   "pc_oi":   pc_oi,
-            "call_iv":  round(call_iv, 3) if call_iv else None,
-            "put_iv":   round(put_iv,  3) if put_iv  else None,
-            "max_pain": max_pain,
-            "max_pain_diff_pct": round((max_pain - spot) / spot * 100, 2) if (max_pain and spot) else None,
-            "unusual":  unusual,
-            "sentiment": sentiment,
-            "expiries": expiries[:6],
-        }
-        cache_set(cache_key, out)
-        return out
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(503, f"options data fail: {e}")
-
 
 # ============================================================================
 # 总经 panel：VIX、10Y、DXY、Fed Funds
 # ============================================================================
+FRED_API_KEY = os.environ.get("FRED_API_KEY", "9fcafc2e833796f5becdcaa898d380c7")
+
+def _fred_latest_two(series_id: str) -> tuple[float | None, float | None]:
+    """取某 series 最近两个有效观测值 (最新, 前值)。FRED 缺值以 '.' 表示需过滤。"""
+    try:
+        r = requests.get(
+            "https://api.stlouisfed.org/fred/series/observations",
+            params={
+                "series_id": series_id,
+                "api_key": FRED_API_KEY,
+                "file_type": "json",
+                "sort_order": "desc",
+                "limit": 10,
+            },
+            timeout=10,
+        )
+        r.raise_for_status()
+        obs = [float(o["value"]) for o in r.json().get("observations", [])
+               if o.get("value") not in (".", "", None)]
+        if len(obs) >= 2:
+            return obs[0], obs[1]
+        if len(obs) == 1:
+            return obs[0], obs[0]
+        return None, None
+    except Exception as e:
+        print(f"[fred] {series_id}: {e}")
+        return None, None
+
 @app.get("/api/macro")
 def api_macro():
-    """总经背景：VIX 恐慌指数、10Y 公债、美元指数、Fed Funds proxy。"""
     cache_key = "macro:snapshot"
     cached = cache_get(cache_key)
     if cached:
         return cached
-
     targets = [
-        ("VIX",  "^VIX",      "恐慌指数", "%",   {"lo": 15, "hi": 25}),
-        ("10Y",  "^TNX",      "10年公债", "%",   {"lo": 3.5, "hi": 4.5}),
-        ("DXY",  "DX-Y.NYB",  "美元指数", "",    {"lo": 100, "hi": 106}),
-        ("2Y",   "^IRX",      "13周短率 (Fed Funds proxy)", "%", {"lo": 4.0, "hi": 5.0}),
+        ("VIX", "VIXCLS",   "恐慌指数", "%", {"lo": 15, "hi": 25}),
+        ("10Y", "DGS10",    "10年公债", "%", {"lo": 3.5, "hi": 4.5}),
+        ("DXY", "DTWEXBGS", "美元指数(广义)", "", {"lo": 118, "hi": 128}),  # 注意基准已变
+        ("2Y",  "DGS2",     "2年公债",  "%", {"lo": 4.0, "hi": 5.0}),
     ]
     out = []
-    end = pd.Timestamp.today()
-    start = end - pd.Timedelta(days=10)
-    for code, yf_code, label, unit, band in targets:
-        try:
-            t = yf.Ticker(yf_code)
-            h = t.history(start=start, end=end, auto_adjust=False)
-            if h.empty or len(h) < 2:
-                out.append({"code": code, "label": label, "value": None, "change": None,
-                            "status": "—", "unit": unit})
-                continue
-            cur  = float(h.iloc[-1]["Close"])
-            prev = float(h.iloc[-2]["Close"])
-            chg  = round(cur - prev, 3)
-            chg_pct = round((cur - prev) / prev * 100, 2) if prev else 0
-
-            # 状态判断
-            status = "neutral"
-            if code == "VIX":
-                if cur > band["hi"]: status = "danger"
-                elif cur < band["lo"]: status = "calm"
-            elif code in ("10Y", "2Y"):
-                if cur > band["hi"]: status = "high"
-                elif cur < band["lo"]: status = "low"
-            elif code == "DXY":
-                if cur > band["hi"]: status = "strong"
-                elif cur < band["lo"]: status = "weak"
-
-            out.append({
-                "code":     code,
-                "yf":       yf_code,
-                "label":    label,
-                "value":    round(cur, 3),
-                "prev":     round(prev, 3),
-                "change":   chg,
-                "change_pct": chg_pct,
-                "unit":     unit,
-                "status":   status,
-                "band":     band,
-            })
-        except Exception as e:
-            print(f"[macro] {code}: {e}")
-            out.append({"code": code, "label": label, "value": None, "status": "—", "unit": unit})
-
+    for code, sid, label, unit, band in targets:
+        cur, prev = _fred_latest_two(sid)
+        if cur is None:
+            out.append({"code": code, "label": label, "value": None,
+                        "status": "—", "unit": unit})
+            continue
+        chg = round(cur - prev, 3)
+        chg_pct = round((cur - prev) / prev * 100, 2) if prev else 0
+        status = "neutral"
+        if code == "VIX":
+            status = "danger" if cur > band["hi"] else "calm" if cur < band["lo"] else "neutral"
+        elif code in ("10Y", "2Y"):
+            status = "high" if cur > band["hi"] else "low" if cur < band["lo"] else "neutral"
+        elif code == "DXY":
+            status = "strong" if cur > band["hi"] else "weak" if cur < band["lo"] else "neutral"
+        out.append({"code": code, "fred": sid, "label": label,
+                    "value": round(cur, 3), "prev": round(prev, 3),
+                    "change": chg, "change_pct": chg_pct,
+                    "unit": unit, "status": status, "band": band})
     cache_set(cache_key, out)
     return out
-
 
 @app.get("/")
 def root():
